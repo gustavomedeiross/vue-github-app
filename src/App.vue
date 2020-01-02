@@ -1,23 +1,25 @@
 <template>
   <div id="app">
-    <Header />
-    <router-view />
+    <Container>
+      <router-view />
+    </Container>
   </div>
 </template>
 
 <script>
-import Header from './components/Header';
+import Container from './components/Container.vue';
 
 export default {
   name: 'app',
   components: {
-    Header,
+    Container,
   },
 };
 </script>
 
-<style>
+<style lang="scss">
 @import url('https://fonts.googleapis.com/css?family=Roboto:400,900&display=swap');
+@import '~@/styles/_variables.scss';
 
 *,
 *::before,
@@ -33,6 +35,8 @@ export default {
 html,
 body {
   min-height: 100%;
+  background-color: $color1;
+  color: $color2;
 }
 
 body {
@@ -60,5 +64,9 @@ ul {
 
 button {
   cursor: pointer;
+}
+
+input {
+  height: 40px;
 }
 </style>
