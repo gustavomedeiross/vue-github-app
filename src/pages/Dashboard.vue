@@ -17,10 +17,12 @@
           <button type="button" v-on:click="handleDelete(repo.id)">
             <fa-icon icon="trash" />
           </button>
-          <strong> {{ repo.full_name }} </strong>
+          <strong> {{ repo.fullName }} </strong>
         </span>
 
-        <router-link to="/">Detail</router-link>
+        <router-link v-bind:to="`repository/${repo.encodedFullName}`"
+          >Detail</router-link
+        >
       </li>
     </ul>
   </div>
@@ -42,9 +44,22 @@ export default {
     async handleSubmit() {
       this.loading = true;
       const response = await api.get(`repos/${this.newRepo}`);
-      this.repos.push(response.data);
+      const repository = this.parseRepository(response.data);
+      this.repos.push(repository);
       this.loading = false;
       this.newRepo = '';
+    },
+
+    parseRepository(repo) {
+      const { id, full_name: fullName } = repo;
+
+      const encodedFullName = encodeURIComponent(fullName);
+
+      return {
+        id,
+        fullName,
+        encodedFullName,
+      };
     },
 
     handleDelete(id) {
