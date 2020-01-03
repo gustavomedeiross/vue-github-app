@@ -1,6 +1,6 @@
 <template>
   <div>
-    <fa-icon icon="spinner" class="fa-4x" full-width />
+    <fa-icon icon="circle-notch" class="fa-4x loading-spinner-ease" full-width />
   </div>
 </template>
 
@@ -8,5 +8,13 @@
 export default {};
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
+@import '~@/styles/animations/_loading.scss';
+
+div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 200px 0;
+}
 </style>

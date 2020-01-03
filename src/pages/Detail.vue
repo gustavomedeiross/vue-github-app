@@ -62,8 +62,8 @@ export default {
   data() {
     return {
       repository: {},
-      loadingRepository: true,
-      loadingIssues: false,
+      loadingRepository: false,
+      loadingIssues: true,
       filters: [
         { value: 'all', content: 'All', disabled: true },
         { value: 'open', content: 'Open', disabled: false },
@@ -92,7 +92,7 @@ export default {
     },
 
     async loadRepositoryAndIssues() {
-      this.loadingFullPage = true;
+      this.loadingRepository = true;
 
       const issuesFilter = this.filters.find(
         filter => filter.disabled === true
@@ -113,7 +113,7 @@ export default {
 
       this.repository = repository.data;
       this.issues = issues.data;
-      // this.loadingFullPage = false;
+      this.loadingRepository = false;
     },
   },
 

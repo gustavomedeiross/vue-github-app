@@ -11,3 +11,7 @@
 .loading-spinner-linear {
   animation: loadingSpinner 1s linear infinite;
 }
+
+.loading-spinner-ease {
+  animation: loadingSpinner 1s ease infinite;
+}
