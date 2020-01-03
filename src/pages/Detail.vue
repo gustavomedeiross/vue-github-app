@@ -2,10 +2,7 @@
   <div class="wrapper">
     <router-link to="/">Go Back to Repositories</router-link>
     <div class="repository-info">
-      <img
-        v-bind:src="repository.owner.avatar_url"
-        v-bind:alt="repository.full_name"
-      />
+      <img v-bind:src="repository.owner.avatar_url" v-bind:alt="repository.full_name" />
 
       <h1>{{ repository.name }}</h1>
       <p>{{ repository.description }}</p>
@@ -20,23 +17,21 @@
           v-for="filter in filters"
           v-bind:key="filter.value"
           v-on:click="handleFilterChange(filter.value)"
-        >
-          {{ filter.content }}
-        </button>
+          v-bind:disabled="filter.disabled"
+        >{{ filter.content }}</button>
       </div>
 
       <ul class="issues-list">
         <li v-for="issue in issues" v-bind:key="issue.id">
-          <img
-            v-bind:src="issue.user.avatar_url"
-            v-bind:alt="issue.user.name"
-          />
+          <img v-bind:src="issue.user.avatar_url" v-bind:alt="issue.user.name" />
           <div class="issue-info">
             <strong>
               <a v-bind:href="issue.html_url">{{ issue.title }}</a>
-              <span v-for="label in issue.labels" v-bind:key="label.id">{{
+              <span v-for="label in issue.labels" v-bind:key="label.id">
+                {{
                 label.name
-              }}</span>
+                }}
+              </span>
             </strong>
             <p>{{ issue.user.login }}</p>
           </div>
@@ -49,30 +44,6 @@
 <script>
 import api from '../services/api';
 
-const loadRepositoryAndIssues = async () => {
-  this.loadingFullPage = true;
-
-  // const issuesFilter = this.filters.find(
-  //   filter => filter.disabled === false
-  // );
-
-  const { repository: repositoryName } = this.$route.params;
-
-  const [repository, issues] = await Promise.all([
-    api.get(`repos/${repositoryName}`),
-    api.get(`repos/${repositoryName}/issues`, {
-      params: {
-        per_page: 5,
-        // state: issuesFilter.value,
-      },
-    }),
-  ]);
-
-  this.repository = repository.data;
-  this.issues = issues.data;
-  this.loadingFullPage = false;
-};
-
 export default {
   data() {
     return {
@@ -80,9 +51,9 @@ export default {
       loadingRepository: false,
       loadingIssues: false,
       filters: [
-        { value: 'all', content: 'All', disabled: false },
-        { value: 'open', content: 'Open', disabled: true },
-        { value: 'closed', content: 'Closed', disabled: true },
+        { value: 'all', content: 'All', disabled: true },
+        { value: 'open', content: 'Open', disabled: false },
+        { value: 'closed', content: 'Closed', disabled: false },
       ],
       issues: [],
     };
@@ -90,18 +61,45 @@ export default {
 
   methods: {
     handleFilterChange(filter) {
-      this.filters = this.filters.map(
-        item => (item.disabled = item.value !== filter)
+      this.filters = this.filters.map(item => ({
+        ...item,
+        disabled: item.value === filter,
+      }));
+    },
+
+    async loadRepositoryAndIssues() {
+      this.loadingFullPage = true;
+
+      const issuesFilter = this.filters.find(
+        filter => filter.disabled === true
       );
-    },
 
-    created() {
-      loadRepositoryAndIssues();
-    },
+      const { repository: repositoryName } = this.$route.params;
 
-    // watch: {
-    //   filters: this.loadRepositoryAndIssues,
-    // },
+      const [repository, issues] = await Promise.all([
+        api.get(`repos/${repositoryName}`),
+        api.get(`repos/${repositoryName}/issues`, {
+          params: {
+            per_page: 5,
+            state: issuesFilter.value,
+          },
+        }),
+      ]);
+
+      this.repository = repository.data;
+      this.issues = issues.data;
+      this.loadingFullPage = false;
+    },
+  },
+
+  created() {
+    this.loadRepositoryAndIssues();
+  },
+
+  watch: {
+    filters() {
+      this.loadRepositoryAndIssues();
+    },
   },
 };
 </script>
@@ -231,5 +229,11 @@ div.wrapper {
       }
     }
   }
+}
+
+button:disabled {
+  cursor: not-allowed;
+  background-color: $color1;
+  color: #fff !important;
 }
 </style>
