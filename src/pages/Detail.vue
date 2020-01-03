@@ -26,7 +26,7 @@
           <img v-bind:src="issue.user.avatar_url" v-bind:alt="issue.user.name" />
           <div class="issue-info">
             <strong>
-              <a v-bind:href="issue.html_url">{{ issue.title }}</a>
+              <a v-bind:href="issue.html_url" target="_blank">{{ issue.title }}</a>
               <span v-for="label in issue.labels" v-bind:key="label.id">
                 {{
                 label.name
@@ -37,6 +37,18 @@
           </div>
         </li>
       </ul>
+
+      <div class="page-buttons">
+        <button
+          type="button"
+          v-on:click="handlePageChange(page - 1)"
+          v-bind:disabled="page <= 1"
+        >Previous</button>
+
+        <span>Page {{page}}</span>
+
+        <button type="button" v-on:click="handlePageChange(page + 1)">Next</button>
+      </div>
     </div>
   </div>
 </template>
@@ -56,15 +68,21 @@ export default {
         { value: 'closed', content: 'Closed', disabled: false },
       ],
       issues: [],
+      page: 1,
     };
   },
 
   methods: {
     handleFilterChange(filter) {
+      this.page = 1;
       this.filters = this.filters.map(item => ({
         ...item,
         disabled: item.value === filter,
       }));
+    },
+
+    handlePageChange(value) {
+      this.page = value;
     },
 
     async loadRepositoryAndIssues() {
@@ -82,6 +100,7 @@ export default {
           params: {
             per_page: 5,
             state: issuesFilter.value,
+            page: this.page,
           },
         }),
       ]);
@@ -98,6 +117,10 @@ export default {
 
   watch: {
     filters() {
+      this.loadRepositoryAndIssues();
+    },
+
+    page() {
       this.loadRepositoryAndIssues();
     },
   },
@@ -173,6 +196,11 @@ div.wrapper {
           color: #fff;
           background-color: $color1;
         }
+
+        &:disabled {
+          background-color: $color1;
+          color: #fff !important;
+        }
       }
     }
 
@@ -228,12 +256,26 @@ div.wrapper {
         }
       }
     }
+
+    .page-buttons {
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      button {
+        background-color: $color2;
+        color: #fff;
+        padding: 10px;
+        border-radius: 4px;
+        width: 70px;
+      }
+    }
   }
 }
 
 button:disabled {
+  opacity: 0.7;
   cursor: not-allowed;
-  background-color: $color1;
-  color: #fff !important;
 }
 </style>
