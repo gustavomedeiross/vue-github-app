@@ -1,5 +1,6 @@
 <template>
-  <div class="wrapper">
+  <LoadingSpinner v-if="loadingRepository" />
+  <div class="wrapper" v-else>
     <router-link to="/">Go Back to Repositories</router-link>
     <div class="repository-info">
       <img v-bind:src="repository.owner.avatar_url" v-bind:alt="repository.full_name" />
@@ -54,13 +55,14 @@
 </template>
 
 <script>
+import LoadingSpinner from '../components/LoadingSpinner';
 import api from '../services/api';
 
 export default {
   data() {
     return {
       repository: {},
-      loadingRepository: false,
+      loadingRepository: true,
       loadingIssues: false,
       filters: [
         { value: 'all', content: 'All', disabled: true },
@@ -70,6 +72,10 @@ export default {
       issues: [],
       page: 1,
     };
+  },
+
+  components: {
+    LoadingSpinner,
   },
 
   methods: {
@@ -107,7 +113,7 @@ export default {
 
       this.repository = repository.data;
       this.issues = issues.data;
-      this.loadingFullPage = false;
+      // this.loadingFullPage = false;
     },
   },
 
@@ -190,6 +196,7 @@ div.wrapper {
         padding: 10px;
         border-radius: 4px;
         color: $color1;
+        background-color: #fff;
         border: 2px solid $color1;
 
         &:hover {

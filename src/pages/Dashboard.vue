@@ -1,7 +1,9 @@
 <template>
   <div>
     <div class="title">
-      <h2><fa-icon :icon="['fab', 'github']" /> Repositories</h2>
+      <h2>
+        <fa-icon :icon="['fab', 'github']" />Repositories
+      </h2>
     </div>
     <form class="input-wrapper" v-on:submit.prevent="handleSubmit">
       <input type="text" v-model="newRepo" placeholder="Add Repository" />
@@ -17,12 +19,10 @@
           <button type="button" v-on:click="handleDelete(repo.id)">
             <fa-icon icon="trash" />
           </button>
-          <strong> {{ repo.fullName }} </strong>
+          <strong>{{ repo.fullName }}</strong>
         </span>
 
-        <router-link v-bind:to="`repository/${repo.encodedFullName}`"
-          >Detail</router-link
-        >
+        <router-link v-bind:to="`repository/${repo.encodedFullName}`">Detail</router-link>
       </li>
     </ul>
   </div>
@@ -126,6 +126,7 @@ ul.repos-wrapper {
       }
 
       button {
+        background-color: transparent;
         svg {
           color: $color4;
           margin-right: 10px;
