@@ -6,7 +6,15 @@
       </h2>
     </div>
     <form class="input-wrapper" v-on:submit.prevent="handleSubmit">
-      <input type="text" v-model="newRepo" placeholder="Add Repository" />
+      <div>
+        <input
+          type="text"
+          v-model="newRepo"
+          placeholder="Add Repository"
+          v-bind:class="{ error: error.length > 0 }"
+        />
+        <span v-if="error.length > 0">{{error}}</span>
+      </div>
       <button type="submit">
         <fa-icon icon="spinner" v-if="loading" class="loading-spinner-linear" />
         <fa-icon icon="plus" v-else />
@@ -37,17 +45,43 @@ export default {
       newRepo: '',
       repos: [],
       loading: false,
+      error: '',
     };
   },
 
   methods: {
     async handleSubmit() {
+      this.error = '';
       this.loading = true;
-      const response = await api.get(`repos/${this.newRepo}`);
-      const repository = this.parseRepository(response.data);
-      this.repos.push(repository);
-      this.loading = false;
-      this.newRepo = '';
+
+      try {
+        const duplicatedRepo = this.repos.some(
+          repo => repo.fullName === this.newRepo
+        );
+
+        if (duplicatedRepo) {
+          throw new Error('You already have this repository');
+        }
+
+        api.interceptors.response.use(null, async err => {
+          if (err.response.status === 404) {
+            throw new Error('Repository not found');
+          }
+
+          return Promise.reject(err);
+        });
+
+        const response = await api.get(`repos/${this.newRepo}`);
+
+        const repository = this.parseRepository(response.data);
+
+        this.repos.push(repository);
+        this.newRepo = '';
+      } catch (err) {
+        this.error = err.message;
+      } finally {
+        this.loading = false;
+      }
     },
 
     parseRepository(repo) {
@@ -75,6 +109,10 @@ export default {
     }
   },
 
+  destroyed() {
+    this.error = '';
+  },
+
   watch: {
     repos() {
       const repos = JSON.stringify(this.repos);
@@ -96,16 +134,32 @@ form {
   display: flex;
   margin: 30px 0;
 
-  input {
-    border: 1px solid #eaeaea;
-    border-radius: 4px;
+  div {
     width: 100%;
+    display: flex;
+    flex-direction: column;
     margin-right: 10px;
-    padding: 10px;
-    color: $color2;
 
-    &:placeholder {
-      color: #eaeaea;
+    input {
+      border: 1px solid #eaeaea;
+      border-radius: 4px;
+      width: 100%;
+      padding: 10px;
+      color: $color2;
+
+      &.error {
+        border-color: $color4;
+      }
+
+      &:placeholder {
+        color: #eaeaea;
+      }
+    }
+
+    span {
+      color: $color4;
+      margin-top: 5px;
+      font-size: 12px;
     }
   }
 
