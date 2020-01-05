@@ -66,6 +66,21 @@ export default {
       this.repos = this.repos.filter(repo => repo.id !== id);
     },
   },
+
+  created() {
+    const rawRepos = localStorage.getItem('repos');
+
+    if (rawRepos) {
+      this.repos = JSON.parse(rawRepos);
+    }
+  },
+
+  watch: {
+    repos() {
+      const repos = JSON.stringify(this.repos);
+      localStorage.setItem('repos', repos);
+    },
+  },
 };
 </script>
 
