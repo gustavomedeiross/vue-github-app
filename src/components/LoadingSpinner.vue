@@ -1,6 +1,6 @@
 <template>
   <div>
-    <fa-icon icon="circle-notch" class="fa-4x loading-spinner-ease" full-width />
+    <fa-icon icon="circle-notch" class="fa-4x loading-spinner-linear" full-width />
   </div>
 </template>
 
@@ -9,6 +9,7 @@ export default {};
 </script>
 
 <style lang="scss" scoped>
+@import '~@/styles/_variables.scss';
 @import '~@/styles/animations/_loading.scss';
 
 div {
@@ -16,5 +17,9 @@ div {
   justify-content: center;
   align-items: center;
   margin: 200px 0;
+
+  svg {
+    color: $color1;
+  }
 }
 </style>

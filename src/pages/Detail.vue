@@ -22,7 +22,11 @@
         >{{ filter.content }}</button>
       </div>
 
-      <ul class="issues-list">
+      <div class="loading-spinner" v-if="loadingIssues">
+        <fa-icon icon="spinner" class="fa-2x loading-spinner-linear" />
+      </div>
+
+      <ul class="issues-list" v-else>
         <li v-for="issue in issues" v-bind:key="issue.id">
           <img v-bind:src="issue.user.avatar_url" v-bind:alt="issue.user.name" />
           <div class="issue-info">
@@ -63,7 +67,7 @@ export default {
     return {
       repository: {},
       loadingRepository: false,
-      loadingIssues: true,
+      loadingIssues: false,
       filters: [
         { value: 'all', content: 'All', disabled: true },
         { value: 'open', content: 'Open', disabled: false },
@@ -91,43 +95,52 @@ export default {
       this.page = value;
     },
 
-    async loadRepositoryAndIssues() {
+    async loadRepository() {
       this.loadingRepository = true;
+
+      const { repository } = this.$route.params;
+
+      const response = await api.get(`repos/${repository}`);
+
+      this.repository = response.data;
+
+      this.loadingRepository = false;
+    },
+
+    async loadIssues() {
+      this.loadingIssues = true;
 
       const issuesFilter = this.filters.find(
         filter => filter.disabled === true
       );
 
-      const { repository: repositoryName } = this.$route.params;
+      const { repository } = this.$route.params;
 
-      const [repository, issues] = await Promise.all([
-        api.get(`repos/${repositoryName}`),
-        api.get(`repos/${repositoryName}/issues`, {
-          params: {
-            per_page: 5,
-            state: issuesFilter.value,
-            page: this.page,
-          },
-        }),
-      ]);
+      const response = await api.get(`repos/${repository}/issues`, {
+        params: {
+          per_page: 5,
+          page: this.page,
+          state: issuesFilter.value,
+        },
+      });
 
-      this.repository = repository.data;
-      this.issues = issues.data;
-      this.loadingRepository = false;
+      this.issues = response.data;
+      this.loadingIssues = false;
     },
   },
 
   created() {
-    this.loadRepositoryAndIssues();
+    this.loadRepository();
+    this.loadIssues();
   },
 
   watch: {
     filters() {
-      this.loadRepositoryAndIssues();
+      this.loadIssues();
     },
 
     page() {
-      this.loadRepositoryAndIssues();
+      this.loadIssues();
     },
   },
 };
@@ -135,6 +148,7 @@ export default {
 
 <style lang="scss" scoped>
 @import '~@/styles/_variables.scss';
+@import '~@/styles/animations/_loading.scss';
 
 div.wrapper {
   display: flex;
@@ -208,6 +222,18 @@ div.wrapper {
           background-color: $color1;
           color: #fff !important;
         }
+      }
+    }
+
+    .loading-spinner {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      margin: 100px;
+
+      svg {
+        color: $color1;
       }
     }
 
